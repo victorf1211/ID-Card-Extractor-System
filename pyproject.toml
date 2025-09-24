@@ -1,0 +1,177 @@
+[project]
+name = "idcard-extractor"
+version = "0.2.0"
+description = "Add your description here"
+requires-python = ">=3.12.11,<3.13"
+dependencies = [
+    "rich>=14.0.0",
+    "icecream>=2.1.4",
+    "loguru>=0.7.3",
+    "python-dotenv>=1.1.0",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.0",
+    "orjson>=3.10.18",
+    "ruamel-yaml>=0.18.14",
+    "pytesseract>=0.3.10",
+    "pillow>=10.0.0",
+    "langchain-core>=0.3.0",
+    "ollama>=0.1.0",
+    "langchain-ollama>=0.3.5,<0.4.0",
+]
+
+[dependency-groups]
+vision = [
+    "opencv-python>=4.11.0.86",
+    "numpy>=1.26.0",
+    "pytesseract>=0.3.10",
+    "pillow>=10.0.0",
+]
+text = [
+    "rapidfuzz>=3.13.0",
+]
+excel = [
+    "pandas[excel]>=2.3.0",
+]
+web = [
+    "streamlit>=1.42.0",
+    "requests>=2.32.3",
+]
+api = [
+    "fastapi[all]>=0.115.13",
+]
+dev = [
+    "pre-commit>=4.2.0",
+    "ruff>=0.12.0",
+    "mypy>=1.16.1",
+    "commitizen>=4.8.3",
+    "cz-conventional-gitmoji>=0.7.0",
+    "taplo>=0.9.3",
+]
+types = [
+    "types-requests>=2.32.3",
+    "pandas-stubs>=2.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/idcard_extractor", "src/x_utils"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src"]
+
+
+## ruff
+# <https://docs.astral.sh/ruff/settings/>
+[tool.ruff]
+required-version = ">=0.12.0"
+target-version = "py312"
+output-format = "concise"
+show-fixes = true
+line-length = 100
+
+[tool.ruff.lint]
+select = ["ALL"]
+exclude = ["playground"]
+
+ignore = [
+    ### Intentionally disabled
+    "E501",   # line-too-long (format 會自動處理)
+    "COM819", # prohibited-trailing-commas (與 ruff format 同時使用時候，執行順序將影響結果)
+    "COM812", # missing-trailing-comma (會與 ruff format 衝突)
+
+    "S101",   # assert  (不允許使用 assert)
+    "RUF001", # ambiguous-unicode-character-string (不要使用不明確的 Unicode 字元)
+    "RUF002", # ambiguous-unicode-character-docstring (不要使用不明確的 Unicode 字元)
+    "RUF003", # ambiguous-unicode-character-comment (不要使用不明確的 Unicode 字元)
+    "D415",   # ends-in-punctuation (註釋結尾應該有標點符號)
+    "TD001",  # invalid-todo-tag (禁止使用 TODO 以外的 tag)
+    "FIX001", # line-contains-fixme (註釋包含 FIXME)
+    "FIX002", # flake8-fixme (註釋包含 TODO)
+
+    "B008",   # unction-call-in-default-argument (不要在默認參數中調用函數)
+    "FBT",    # flake8-boolean-trap (不要使用 True/False 作為函數的位置參數)
+    "SIM117", # multiple-with-statements (不要使用嵌套 with)
+    "EM",     # flake8-errmsg (錯誤訊息字串要先分配給變數)
+    "TRY003", # raise-vanilla-args (自定義例外包含額外的長訊息)
+    "TRY400", # error-instead-of-exception (logging 應該用 exception 取代 error)
+    "G",      # flake8-logging-format (各種對 logging 的限制)
+
+    ### Enable gradually
+    "D", # pydocstyle (允許缺少模組文檔)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"./src/x_utils/*.py" = [
+    "T201", # print (允許使用 print)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = []
+split-on-trailing-comma = false
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-type-checking]
+exempt-modules = ["typing", "typing_extensions"]
+
+[tool.ruff.lint.pylint]
+max-returns = 6
+max-branches = 12
+max-args = 6
+max-statements = 50
+
+[tool.ruff.format]
+docstring-code-format = true
+skip-magic-trailing-comma = false # 當你想要盡可能消除尾隨逗號時候可以暫時性開啟
+
+
+## mypy
+# <https://mypy.readthedocs.io/en/stable/config_file.html>
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+files = ["."]
+exclude = ["playground"]
+strict = true
+pretty = true
+# <https://mypy.readthedocs.io/en/stable/error_code_list2.html>
+enable_error_code = [
+    "ignore-without-code",
+    "possibly-undefined",
+    "truthy-bool",
+    "truthy-iterable",
+    "redundant-expr",
+    "explicit-override",
+    "mutable-override",
+    "unused-awaitable",
+    "unimported-reveal",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "icecream",
+    "easyocr",
+    "rapidfuzz",
+    "requests",
+    "streamlit",
+]
+ignore_missing_imports = true
+
+
+## cz
+# <https://commitizen-tools.github.io/commitizen/config/>
+[tool.commitizen]
+name = "cz_gitmoji"
+version_provider = "uv"
+update_changelog_on_bump = true
+changelog_incremental = true
+allowed_prefixes = ["Merge", "Revert", "Squash"]
+major_version_zero = true
